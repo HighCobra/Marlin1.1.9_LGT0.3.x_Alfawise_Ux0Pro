@@ -97,7 +97,7 @@ Temperature thermalManager;
 
 float Temperature::current_temperature[HOTENDS] = { 0.0 };
 int16_t Temperature::current_temperature_raw[HOTENDS] = { 0 },
-        Temperature::target_temperature[HOTENDS] = {0}; //0
+        Temperature::target_temperature[HOTENDS] = { 0 };
 
 #if ENABLED(AUTO_POWER_E_FANS)
   int16_t Temperature::autofan_speed[HOTENDS] = { 0 };
@@ -106,7 +106,7 @@ int16_t Temperature::current_temperature_raw[HOTENDS] = { 0 },
 #if HAS_HEATED_BED
   float Temperature::current_temperature_bed = 0.0;
   int16_t Temperature::current_temperature_bed_raw = 0,
-	      Temperature::target_temperature_bed = 0;
+          Temperature::target_temperature_bed = 0;
   uint8_t Temperature::soft_pwm_amount_bed;
   #ifdef BED_MINTEMP
     int16_t Temperature::bed_minttemp_raw = HEATER_BED_RAW_LO_TEMP;
@@ -830,7 +830,6 @@ void Temperature::manage_heater() {
 		  if (degHotend(e) < watch_target_temp[e])                             // Failed to increase enough?
 		  {
 		#ifdef LGT_MAC
-			  //LGT_LCD.LGT_Send_Data_To_Screen(0x2000,1);
 			  kill_type = E_TEMP_KILL;
 		#endif // LGT_MAC
 			  _temp_error(e, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, e));
@@ -876,7 +875,6 @@ void Temperature::manage_heater() {
 		  if (degBed() < watch_target_bed_temp)                           // Failed to increase enough?
 		  {
 			#ifdef LGT_MAC
-			  //LGT_LCD.LGT_Send_Data_To_Screen(0x2000, 2);
 			  kill_type = B_TEMP_KILL;
 			#endif // LGT_MAC
 			  _temp_error(-1, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, -1));

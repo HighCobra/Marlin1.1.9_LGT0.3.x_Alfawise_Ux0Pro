@@ -109,7 +109,6 @@
 		#define LGT_MAC	
 		#ifdef LGT_MAC
 			//U20_Pro
-//			#define U20_Pro
 				#ifdef U20_Pro
 					#define U20_Pro_AutoBed
 				#else
@@ -392,6 +391,7 @@
 
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 
+  // Ultimaker
   #define DEFAULT_Kp 22.2
   #define DEFAULT_Ki 1.08
   #define DEFAULT_Kd 114
@@ -538,6 +538,7 @@
   //#define ENDSTOPPULLUP_ZMIN
   //#define ENDSTOPPULLUP_ZMIN_PROBE
 #endif
+
 // Mechanical endstop with COM to ground and NC to Signal uses "false" here (most common setup).
 #define X_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 #define Y_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
@@ -1040,7 +1041,7 @@
   // Gradually reduce leveling correction until a set height is reached,
   // at which point movement will be level to the machine's XY plane.
   // The height can be set with M420 Z<height>
-   #define ENABLE_LEVELING_FADE_HEIGHT
+  #define ENABLE_LEVELING_FADE_HEIGHT
 
   // For Cartesian machines, instead of dividing moves on mesh boundaries,
   // split up moves into short segments like a Delta. This follows the
@@ -1196,8 +1197,8 @@
 #endif
 
 #if ENABLED(Z_SAFE_HOMING)
-  #define Z_SAFE_HOMING_X_POINT ((X_BED_SIZE) / 2)//(((X_BED_SIZE) / 2)+X_PROBE_OFFSET_FROM_EXTRUDER)   // X point for Z homing when homing all axes (G28).
-  #define Z_SAFE_HOMING_Y_POINT ((Y_BED_SIZE) / 2)//(((Y_BED_SIZE) / 2)+Y_PROBE_OFFSET_FROM_EXTRUDER)   // Y point for Z homing when homing all axes (G28).
+  #define Z_SAFE_HOMING_X_POINT ((X_BED_SIZE) / 2)    // X point for Z homing when homing all axes (G28).
+  #define Z_SAFE_HOMING_Y_POINT ((Y_BED_SIZE) / 2)    // Y point for Z homing when homing all axes (G28).
 #endif
 
 // Homing speeds (mm/m)

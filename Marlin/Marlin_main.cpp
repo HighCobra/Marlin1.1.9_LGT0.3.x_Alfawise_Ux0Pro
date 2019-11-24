@@ -1098,7 +1098,6 @@ void gcode_line_error(const char* err, bool doFlush = true) {
  * left on the serial port.
  */
 inline void get_serial_commands() {
-
   static char serial_line_buffer[MAX_CMD_SIZE];
   static bool serial_comment_mode = false;
 
@@ -1117,8 +1116,8 @@ inline void get_serial_commands() {
    * Loop while serial characters are incoming and the queue is not full
    */
   int c;
-  while (commands_in_queue < BUFSIZE && (((c = MYSERIAL0.read()) >= 0) )) 
-  {
+  while (commands_in_queue < BUFSIZE && (c = MYSERIAL0.read()) >= 0) {
+
     char serial_char = c;
 
     /**
@@ -1327,8 +1326,6 @@ inline void get_serial_commands() {
 
     inline bool drain_job_recovery_commands() {
       static uint8_t job_recovery_commands_index = 0; // Resets on reboot
-	  //MYSERIAL0.println((int)job_recovery_commands_count);
-	  //MYSERIAL0.println(sizeof(job_recovery_commands));
       if (job_recovery_commands_count) {
         if (_enqueuecommand(job_recovery_commands[job_recovery_commands_index])) {
           ++job_recovery_commands_index;
@@ -3139,7 +3136,8 @@ static void do_homing_move(const AxisEnum axis, const float distance, const floa
     #if HOMING_Z_WITH_PROBE && QUIET_PROBING
       if (axis == Z_AXIS) probing_pause(false);
     #endif
-		  endstops.validate_homing_move();
+
+    endstops.validate_homing_move();
 
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
@@ -4402,27 +4400,26 @@ inline void gcode_G28(const bool always_home_all) {
           (parser.seenval('R') ? parser.value_linear_units() : Z_HOMING_HEIGHT)
     );
 
-	if (z_homing_height && (home_all || homeX || homeY)) {
-		// Raise Z before homing any other axes and z is not already high enough (never lower z)
-		if (current_position[Z_AXIS] >= 0)
-		{
-			destination[Z_AXIS] = z_homing_height;
-			if (destination[Z_AXIS] > current_position[Z_AXIS]) {
+    if (z_homing_height && (home_all || homeX || homeY)) {
+      // Raise Z before homing any other axes and z is not already high enough (never lower z)
+      if (current_position[Z_AXIS] >= 0)
+      {
+        destination[Z_AXIS] = z_homing_height;
+        if (destination[Z_AXIS] > current_position[Z_AXIS]) {
 
-#if ENABLED(DEBUG_LEVELING_FEATURE)
-				if (DEBUGGING(LEVELING))
-					SERIAL_ECHOLNPAIR("Raise Z (before homing) to ", destination[Z_AXIS]);
-#endif
+          #if ENABLED(DEBUG_LEVELING_FEATURE)
+            if (DEBUGGING(LEVELING))
+              SERIAL_ECHOLNPAIR("Raise Z (before homing) to ", destination[Z_AXIS]);
+          #endif
 
-				do_blocking_move_to_z(destination[Z_AXIS]);
-			}
-		}
-		else
-		{
-			do_blocking_move_to_z(current_position[Z_AXIS]+ Z_HOMING_HEIGHT);
-		}
+          do_blocking_move_to_z(destination[Z_AXIS]);
+        }
+      }
+      else
+      {
+        do_blocking_move_to_z(current_position[Z_AXIS]+ Z_HOMING_HEIGHT);
+      }
     }
-
 
     #if ENABLED(QUICK_HOME)
 
@@ -7356,7 +7353,6 @@ inline void gcode_M17() {
    *
    * Used by M125 and M600
    */
-  
   static void wait_for_filament_reload(const int8_t max_beep_count=0) {
     bool nozzle_timed_out = false;
 
@@ -7442,7 +7438,7 @@ inline void gcode_M17() {
     }
     KEEPALIVE_STATE(IN_HANDLER);
   }
- 
+
   /**
    * Resume or Start print procedure
    *
@@ -7588,7 +7584,6 @@ inline void gcode_M17() {
    * M25: Pause SD Print
    */
   inline void gcode_M25() {
-	//save_feedtate = feedrate_mm_s;
     card.pauseSDPrint();
     print_job_timer.pause();
     #if ENABLED(PARK_HEAD_ON_PAUSE)
@@ -8393,6 +8388,7 @@ inline void gcode_M104() {
   if (parser.seenval('S')) {
     const int16_t temp = parser.value_celsius();
     thermalManager.setTargetHotend(temp, target_extruder);
+
     #if ENABLED(DUAL_X_CARRIAGE)
       if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
         thermalManager.setTargetHotend(temp ? temp + duplicate_extruder_temp_offset : 0, 1);
@@ -8479,13 +8475,11 @@ inline void gcode_M105() {
               new_fanSpeeds[p] = MIN(t, 255);
               break;
           }
-		  //fanspeed_flag = true;
           return;
         }
       #endif // EXTRA_FAN_SPEED
       const uint16_t s = parser.ushortval('S', 255);
       fanSpeeds[p] = MIN(s, 255U);
-	  //fanspeed_flag = true;
     }
   }
 
@@ -8495,7 +8489,6 @@ inline void gcode_M105() {
   inline void gcode_M107() {
     const uint16_t p = parser.ushortval('P');
     if (p < FAN_COUNT) fanSpeeds[p] = 0;
-	//fanspeed_flag = false;
   }
 
 #endif // FAN_COUNT > 0
@@ -8655,6 +8648,7 @@ inline void gcode_M109() {
       #endif
       SERIAL_EOL();
     }
+
     idle();
     reset_stepper_timeout(); // Keep steppers powered
 
@@ -8835,6 +8829,7 @@ inline void gcode_M109() {
         #endif
         SERIAL_EOL();
       }
+
       idle();
       reset_stepper_timeout(); // Keep steppers powered
 
@@ -8888,16 +8883,6 @@ inline void gcode_M109() {
     #if DISABLED(BUSY_WHILE_HEATING)
       KEEPALIVE_STATE(IN_HANDLER);
     #endif
-	#ifdef LGT_MAC
-	  //LGT_LCD.LGT_Send_Data_To_Screen(ADDR_VAL_ICON_HIDE,1);
-	//  LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 5, 1);
-	  //LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-	  //delay(50);
-	  //LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1797, 1);
-	  //LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-	  //delay(50);
-	  //LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 517, 1);
-	#endif // LGT_MAC
   }
 
 #endif // HAS_HEATED_BED
@@ -12300,7 +12285,6 @@ inline void gcode_M999() {
   flush_and_request_resend();
 }
 
-
 #if DO_SWITCH_EXTRUDER
   #if EXTRUDERS > 3
     #define REQ_ANGLES 4
@@ -15358,9 +15342,11 @@ void setup() {
   #if HAS_STEPPER_RESET
     disableStepperDrivers();
   #endif
+
   MYSERIAL0.begin(BAUDRATE);
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START();
+
   // Prepare communication for TMC drivers
   #if HAS_DRIVER(TMC2130)
     tmc_init_cs_pins();
@@ -15639,9 +15625,7 @@ void loop() {
       else {
         process_next_command();
         #if ENABLED(POWER_LOSS_RECOVERY)
-		if (card.cardOK && card.sdprinting) {
-			save_job_recovery_info();
-		}
+          if (card.cardOK && card.sdprinting) save_job_recovery_info();
         #endif
       }
 

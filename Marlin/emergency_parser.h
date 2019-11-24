@@ -126,10 +126,10 @@ public:
         if (c == '\n') {
           switch (state) {
             case EP_M108:
-				wait_for_user = wait_for_heatup = false; /*LGT_stop_printing = true; MYSERIAL0.println("LGT_stop_print");*/
+              wait_for_user = wait_for_heatup = false;
               break;
             case EP_M112:
-              killed_by_M112 = true; 
+              killed_by_M112 = true;
 			#ifdef LGT_MAC
 			  kill_type = M112_KILL;
 			#endif // LGT_MAC

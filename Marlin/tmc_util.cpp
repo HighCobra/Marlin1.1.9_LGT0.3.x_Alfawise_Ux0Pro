@@ -21,6 +21,7 @@
  */
 
 #include "MarlinConfig.h"
+
 #if HAS_TRINAMIC
 
 #include "tmc_util.h"

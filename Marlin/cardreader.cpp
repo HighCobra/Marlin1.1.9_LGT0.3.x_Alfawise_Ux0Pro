@@ -996,23 +996,15 @@ void CardReader::printingHasFinished() {
   bool CardReader::jobRecoverFileExists() {
     const bool exists = jobRecoveryFile.open(&root, job_recovery_file_name, O_READ);
     if (exists) jobRecoveryFile.close();
-	//MYSERIAL0.println("re");
-	//MYSERIAL0.print(exists);
     return exists;
   }
 
   int16_t CardReader::saveJobRecoveryInfo() {
     jobRecoveryFile.seekSet(0);
     const int16_t ret = jobRecoveryFile.write(&job_recovery_info, sizeof(job_recovery_info));
-//#ifdef LGT_MAC
-//	if (ret == -1)
-//		LGT_LCD.LGT_Change_Page(ID_DIALOG_NO_FILA);
-//#endif // LGT_MAC
-
    // #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
-   //  if (ret == -1) SERIAL_PROTOCOLLNPGM("Power-loss file write failed.");
-  //  #endif
 	  if (ret == -1) SERIAL_PROTOCOLLNPGM("Power-loss file write failed.");
+   // #endif
     return ret;
   }
 
@@ -1021,7 +1013,6 @@ void CardReader::printingHasFinished() {
   }
 
   void CardReader::removeJobRecoveryFile() {
-	 // MYSERIAL0.println("remove");
     job_recovery_info.valid_head = job_recovery_info.valid_foot = job_recovery_commands_count = 0;
     if (jobRecoverFileExists()) {
       closefile();
