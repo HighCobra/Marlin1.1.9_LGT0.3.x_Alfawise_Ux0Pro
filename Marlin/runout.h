@@ -54,7 +54,7 @@ class FilamentRunoutSensor {
 #ifdef LGT_MAC
 	(LGT_is_printing == true)&&
 #endif
-	(IS_SD_PRINTING || print_job_timer.isRunning()) && check() && !filament_ran_out) {
+      if ((IS_SD_PRINTING() || print_job_timer.isRunning()) && check() && !filament_ran_out) {
         filament_ran_out = true;
 #ifdef LGT_MAC
 		LGT_LCD.LGT_Change_Page(ID_DIALOG_NO_FILA);
