@@ -763,6 +763,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 	extern char menu_move_dis_chk,menu_fila_type_chk;
 	extern void LGT_Line_To_Current(AxisEnum axis);
 	void DWIN_MAIN_FUNCTIONS();
+	
 	void LGT_Pause_Move()
 	{
 		resume_x_position = current_position[X_AXIS];
@@ -773,6 +774,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 		do_blocking_move_to_xy(FILAMENT_RUNOUT_MOVE_X, FILAMENT_RUNOUT_MOVE_Y, FILAMENT_RUNOUT_MOVE_F);
 		planner.synchronize();
 	}
+	
 	void LGT_Init()
 	{
 		#if ENABLED(serial_port1)
@@ -784,6 +786,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 			check_print_job_recovery();
 		#endif
 	}
+	
 	void LGT_LCD_startup_settings()
 	{
 		if (ii_setup < STARTUP_COUNTER)
@@ -2402,20 +2405,17 @@ void clean_up_after_endstop_or_probe_move() {
     if (zprobe_zoffset < 0) z_dest -= zprobe_zoffset;
 
     NOMORE(z_dest, Z_MAX_POS);
-#ifdef LGT_MAC
-	if (current_position[Z_AXIS] > 0)
-	{
-		if (z_dest > current_position[Z_AXIS]);
-		do_blocking_move_to_z(z_dest);
-	}
-	else
-	{
-		do_blocking_move_to_z(current_position[Z_AXIS] + z_dest);
-	}
-#else
-	if (z_dest > current_position[Z_AXIS]);
-	do_blocking_move_to_z(z_dest);
-#endif // LGT_MAC
+    #ifdef LGT_MAC
+      if (current_position[Z_AXIS] > 0) {
+        if (z_dest > current_position[Z_AXIS]);
+          do_blocking_move_to_z(z_dest);
+      } else {
+        do_blocking_move_to_z(current_position[Z_AXIS] + z_dest);
+      }
+  #else
+    if (z_dest > current_position[Z_AXIS]);
+    do_blocking_move_to_z(z_dest);
+  #endif // LGT_MAC
   }
 
   // returns false for ok and true for failure
@@ -2767,7 +2767,9 @@ void clean_up_after_endstop_or_probe_move() {
       LCD_MESSAGEPGM(MSG_ERR_PROBING_FAILED);
       SERIAL_ERROR_START();
       SERIAL_ERRORLNPGM(MSG_ERR_PROBING_FAILED);
-	  leveling_sta = 2;  //failed
+      #ifdef LGT_MAC
+        leveling_sta = 2;  //failed
+      #endif
     }
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -4494,10 +4496,10 @@ inline void gcode_G4() {
  */
 inline void gcode_G28(const bool always_home_all) {
 
-#ifdef LGT_MAC
-	if (LGT_is_printing == false&& menu_type == eMENU_MOVE)
-		LGT_LCD.LGT_Change_Page(ID_DIALOG_MOVE_WAIT);
-#endif // LGT_MAC
+  #ifdef LGT_MAC
+    if (LGT_is_printing == false&& menu_type == eMENU_MOVE)
+      LGT_LCD.LGT_Change_Page(ID_DIALOG_MOVE_WAIT);
+  #endif // LGT_MAC
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
@@ -4606,9 +4608,10 @@ inline void gcode_G28(const bool always_home_all) {
     );
 
     if (z_homing_height && (home_all || homeX || homeY)) {
-      // Raise Z before homing any other axes and z is not already high enough (never lower z)
-      if (current_position[Z_AXIS] >= 0)
-      {
+      #ifdef LGT_MAC
+        if (current_position[Z_AXIS] >= 0) {
+	  #endif
+        // Raise Z before homing any other axes and z is not already high enough (never lower z)
         destination[Z_AXIS] = z_homing_height;
         if (destination[Z_AXIS] > current_position[Z_AXIS]) {
 
@@ -4619,11 +4622,11 @@ inline void gcode_G28(const bool always_home_all) {
 
           do_blocking_move_to_z(destination[Z_AXIS]);
         }
-      }
-      else
-      {
-        do_blocking_move_to_z(current_position[Z_AXIS]+ Z_HOMING_HEIGHT);
-      }
+      #ifdef LGT_MAC
+        } else {
+          do_blocking_move_to_z(current_position[Z_AXIS]+ Z_HOMING_HEIGHT);
+	  #endif
+	  }
     }
 
     #if ENABLED(QUICK_HOME)
@@ -4740,17 +4743,17 @@ inline void gcode_G28(const bool always_home_all) {
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< G28");
   #endif
-#ifdef LGT_MAC
-	if (LGT_is_printing == false && menu_type== eMENU_MOVE)
-	{
-		if(menu_move_dis_chk==0)
-			LGT_LCD.LGT_Change_Page(ID_MENU_MOVE_0);
-		else if(menu_move_dis_chk==1)
-			LGT_LCD.LGT_Change_Page(ID_MENU_MOVE_1);
-		else
-			LGT_LCD.LGT_Change_Page(ID_MENU_MOVE_1+1);
-	}
-#endif // LGT_MAC
+  #ifdef LGT_MAC
+    if (LGT_is_printing == false && menu_type== eMENU_MOVE)
+    {
+      if(menu_move_dis_chk==0)
+        LGT_LCD.LGT_Change_Page(ID_MENU_MOVE_0);
+      else if(menu_move_dis_chk==1)
+        LGT_LCD.LGT_Change_Page(ID_MENU_MOVE_1);
+      else
+        LGT_LCD.LGT_Change_Page(ID_MENU_MOVE_1+1);
+    }
+  #endif // LGT_MAC
 } // G28
 
 void home_all_axes() { gcode_G28(true); }
@@ -5697,10 +5700,10 @@ void home_all_axes() { gcode_G28(true); }
 
         if (!dryrun) extrapolate_unprobed_bed_level();
         print_bilinear_leveling_grid();
-#ifdef U20_Pro
-		leveling_sta = 1;  //ok
-		settings.save();
-#endif // U20_Pro
+        #ifdef U20_Pro
+          leveling_sta = 1;  //ok
+          settings.save();
+        #endif // U20_Pro
         refresh_bed_level();
 
         #if ENABLED(ABL_BILINEAR_SUBDIVISION)
@@ -7737,10 +7740,10 @@ inline void gcode_M17() {
 
     #if ENABLED(POWER_LOSS_RECOVERY)
       if (parser.seenval('T'))
-		#ifndef LGT_MAC
-			 print_job_timer.resume(parser.value_long());
-		#endif // LGT_MAC
-	  ;
+        #ifndef LGT_MAC
+          print_job_timer.resume(parser.value_long());
+        #endif // LGT_MAC
+      ;
       else
     #endif
         print_job_timer.start();
@@ -7756,10 +7759,10 @@ inline void gcode_M17() {
     #if ENABLED(PARK_HEAD_ON_PAUSE)
 		//enqueue_and_echo_commands_P(PSTR("M125 L0 X10 Y260 Z0")); // Must be enqueued with pauseSDPrint set to be last in the buffer
     #endif
-	#ifdef LGT_MAC
-		  status_type = PRINTER_PAUSE;
-		  enqueue_and_echo_commands_P(PSTR("M2003"));
-	#endif // LGT_MAC
+    #ifdef LGT_MAC
+      status_type = PRINTER_PAUSE;
+      enqueue_and_echo_commands_P(PSTR("M2003"));
+    #endif // LGT_MAC
   }
 
   /**
@@ -8672,10 +8675,11 @@ inline void gcode_M105() {
    * M112: Emergency Stop
    */
   inline void gcode_M112() {
-		#ifdef LGT_MAC
-			  kill_type = M112_KILL;
-		#endif // LGT_MAC 
-	  kill(PSTR(MSG_KILLED)); }
+    #ifdef LGT_MAC
+      kill_type = M112_KILL;
+    #endif // LGT_MAC 
+    kill(PSTR(MSG_KILLED)); 
+  }
 
 
   /**
@@ -8714,24 +8718,23 @@ inline void gcode_M109() {
   if (set_temp) {
     const int16_t temp = parser.value_celsius();
     thermalManager.setTargetHotend(temp, target_extruder);
-#ifdef LGT_MAC
-	if (LGT_is_printing)
-	{
-		LGT_LCD.LGT_Send_Data_To_Screen(ADDR_VAL_ICON_HIDE, 0);
-		LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 5, 0);
-		LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		delay(50);
-#ifdef U20_Pro
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1797, 0);
-#else
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1541, 0);
-#endif
-		LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		delay(50);
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 517, 0);
-	}
-#endif // LGT_MAC
+    #ifdef LGT_MAC
+	  if (LGT_is_printing) {
+        LGT_LCD.LGT_Send_Data_To_Screen(ADDR_VAL_ICON_HIDE, 0);
+        LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+        LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 5, 0);
+        LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+        delay(50);
+        #ifdef U20_Pro
+          LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1797, 0);
+        #else
+          LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1541, 0);
+        #endif
+        LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+        delay(50);
+        LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 517, 0);
+      }
+    #endif // LGT_MAC
 
     #if ENABLED(DUAL_X_CARRIAGE)
       if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
@@ -8875,23 +8878,22 @@ inline void gcode_M109() {
   #if DISABLED(BUSY_WHILE_HEATING)
     KEEPALIVE_STATE(IN_HANDLER);
   #endif
-#ifdef LGT_MAC
-	if (LGT_is_printing)
-	{
-		LGT_LCD.LGT_Send_Data_To_Screen(ADDR_VAL_ICON_HIDE, 1);
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 5, 1);
-		LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		delay(50);
-#ifdef U20_Pro
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1797, 1);
-#else
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1541, 1);
-#endif
-		LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		delay(50);
-		LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 517, 1);
-	}
-#endif // LGT_MAC
+  #ifdef LGT_MAC
+    if (LGT_is_printing) {
+      LGT_LCD.LGT_Send_Data_To_Screen(ADDR_VAL_ICON_HIDE, 1);
+      LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 5, 1);
+      LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+      delay(50);
+      #ifdef U20_Pro
+        LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1797, 1);
+      #else
+        LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1541, 1);
+      #endif
+      LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+      delay(50);
+      LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 517, 1);
+    }
+  #endif // LGT_MAC
 }
 
 #if HAS_HEATED_BED
@@ -8921,24 +8923,23 @@ inline void gcode_M109() {
     const bool no_wait_for_cooling = parser.seenval('S');
     if (no_wait_for_cooling || parser.seenval('R')) {
       thermalManager.setTargetBed(parser.value_celsius());
-	#ifdef LGT_MAC
-	  if (LGT_is_printing)
-	  {
-		  LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		  LGT_LCD.LGT_Send_Data_To_Screen(ADDR_VAL_ICON_HIDE, 0);
-		  LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 5, 0);
-		  LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		  delay(50);
-#ifdef U20_Pro
-		  LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1797, 0);
-#else
-		  LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1541, 0);
-#endif
-		  LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
-		  delay(50);
-		  LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 517, 0);
-	  }
-	#endif // LGT_MAC
+      #ifdef LGT_MAC
+        if (LGT_is_printing) {
+          LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+          LGT_LCD.LGT_Send_Data_To_Screen(ADDR_VAL_ICON_HIDE, 0);
+          LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 5, 0);
+          LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+          delay(50);
+          #ifdef U20_Pro
+            LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1797, 0);
+          #else
+            LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_TUNE, 1541, 0);
+          #endif
+          LGT_LCD.LGT_Get_MYSERIAL1_Cmd();
+          delay(50);
+          LGT_LCD.LGT_Disable_Enable_Screen_Button(ID_MENU_PRINT_HOME, 517, 0);
+        }
+      #endif // LGT_MAC
       #if ENABLED(PRINTJOB_TIMER_AUTOSTART)
         if (parser.value_celsius() > BED_MINTEMP)
           print_job_timer.start();
@@ -11360,8 +11361,10 @@ inline void gcode_M502() {
     if (parser.seenval('X')) park_point.x = parser.linearval('X');
     if (parser.seenval('Y')) park_point.y = parser.linearval('Y');
 
-	if (parser.linearval('F') > 0.0)
-		feedrate_mm_s = MMM_TO_MMS(parser.value_feedrate());
+    #ifdef LGT_MAC
+      if (parser.linearval('F') > 0.0)
+        feedrate_mm_s = MMM_TO_MMS(parser.value_feedrate());
+    #endif
 
     #if HOTENDS > 1 && DISABLED(DUAL_X_CARRIAGE) && DISABLED(DELTA)
       park_point.x += (active_extruder ? hotend_offset[X_AXIS][active_extruder] : 0);
@@ -13058,41 +13061,41 @@ void process_parsed_command() {
       #endif
 
       case 28: gcode_G28(false);
-		#if ENABLED(U20_Pro_AutoBed)
-			set_bed_leveling_enabled(true);
-		#endif
-		  break;                           // G28: Home one or more axes
+      #if ENABLED(U20_Pro_AutoBed)
+        set_bed_leveling_enabled(true);
+      #endif
+      break;                                                      // G28: Home one or more axes
 
       #if HAS_LEVELING
         case 29: gcode_G29(); 
-#ifdef LGT_MAC
-			if (leveling_sta ==1)   //ok
-			{
-				leveling_sta = 0;
-				if (LGT_is_printing == false)
-				{
-					LGT_LCD.LGT_Change_Page(ID_MENU_MEASU_FINISH);
-					disable_all_steppers();
-				}
-			}
-			else if (leveling_sta == 2)  //failed
-			{
-				if (LGT_is_printing == false)
-				{
-					leveling_sta = 0;
-					LGT_LCD.LGT_Change_Page(ID_DIALOG_LEVEL_FAILE);
-					disable_all_steppers();
-				}
-				else
-				{
-					LGT_LCD.LGT_Change_Page(ID_DIALOG_PRINT_LEVEL_FAILE);
-					wait_for_heatup = false;
-					LGT_stop_printing = true;
-					LGT_LCD.LGT_Exit_Print_Page();
-				}
-			}
-#endif // LGT_MAC
-			break;                              // G29: Detailed Z probe
+        #ifdef LGT_MAC
+          if (leveling_sta == 1)   //ok
+          {
+            leveling_sta = 0;
+            if (LGT_is_printing == false)
+            {
+              LGT_LCD.LGT_Change_Page(ID_MENU_MEASU_FINISH);
+              disable_all_steppers();
+            }
+          }
+          else if (leveling_sta == 2)  //failed
+          {
+            if (LGT_is_printing == false)
+            {
+              leveling_sta = 0;
+              LGT_LCD.LGT_Change_Page(ID_DIALOG_LEVEL_FAILE);
+              disable_all_steppers();
+            }
+            else
+            {
+              LGT_LCD.LGT_Change_Page(ID_DIALOG_PRINT_LEVEL_FAILE);
+              wait_for_heatup = false;
+              LGT_stop_printing = true;
+              LGT_LCD.LGT_Exit_Print_Page();
+            }
+          }
+        #endif // LGT_MAC
+        break;                                                    // G29: Detailed Z probe
       #endif
 
       #if HAS_BED_PROBE
@@ -13500,67 +13503,76 @@ void process_parsed_command() {
       #endif
 
       case 999: gcode_M999(); break;                              // M999: Restart after being Stopped
-#ifdef LGT_MAC
-	  case 2000:   //stop printing and return to home menu
-		  relative_mode = false;
-		  gcode_M18_M84();
-		  LGT_is_printing = false;
-		  if (leveling_sta!=2)
-		  {
-			  LGT_LCD.LGT_Change_Page(ID_MENU_HOME);
-		  }
-		  else
-		  {
-			  leveling_sta=0;
-		  }
-		  runout.reset();
-		  break;
-	  case 2001:	// wait for printing pausing
-		  LGT_Pause_Move();
-		  LGT_LCD.LGT_Change_Page(ID_MENU_PRINT_HOME_PAUSE);
-		  break;
-	#ifdef U20_Pro
-	  case 2002:	// wait for levelling measuring 
-		  planner.synchronize();
-		  LGT_LCD.LGT_Change_Page(ID_MENU_MEASU_S1 + 1);
-		  break;
-	#endif // U20_Pro
-	  case 2003:      //save position and filament runout  move
-		  LGT_Pause_Move();
-		  break;
-	  case 2004:  //load filament
-		  LGT_LCD.LGT_Change_Filament(LOAD_FILA_LEN);
-		  break;
-	  case 2005:  //unload filament
-		  LGT_LCD.LGT_Change_Filament(UNLOAD_FILA_LEN);
-		  break;
-	  case 2006:   //filament change in printing
-		  LGT_Pause_Move();
-		  LGT_LCD.LGT_Change_Page(ID_MENU_HOME_FILA_0);
-		  menu_type = eMENU_HOME_FILA;
-		  break;
-	  case 2007:
-		  if (parser.seen('Z'))
-		  {
-			  current_position[Z_AXIS] = parser.value_linear_units();
-			  LGT_Line_To_Current(Z_AXIS);
-			  planner.set_z_position_mm((destination[Z_AXIS] = current_position[Z_AXIS] = 0));
-		  }
-		  else if (parser.seen('E'))
-		  {
-			  current_position[E_AXIS] = parser.value_linear_units();
-			  LGT_Line_To_Current(E_AXIS);
-			  planner.set_e_position_mm((destination[E_CART] = current_position[E_CART] = 0));
-		  }
-		  break;
-	  case 2008:
-		  for (int add = EEPROM_INDEX; add < (EEPROM_INDEX + 4); add++)
-		  {
-			  eeprom_write_byte((uint8_t *)add, (uint8_t)0);
-			  MYSERIAL0.println((int)eeprom_read_byte((const uint8_t *)add));
-		  }
-		break;
-#endif // LGT_MAC
+
+      #ifdef LGT_MAC
+        case 2000:   //stop printing and return to home menu
+          relative_mode = false;
+          gcode_M18_M84();
+          LGT_is_printing = false;
+          if (leveling_sta!=2)
+          {
+            LGT_LCD.LGT_Change_Page(ID_MENU_HOME);
+          }
+          else
+          {
+            leveling_sta=0;
+          }
+          runout.reset();
+          break;
+
+      	case 2001:	// wait for printing pausing
+      	  LGT_Pause_Move();
+      	  LGT_LCD.LGT_Change_Page(ID_MENU_PRINT_HOME_PAUSE);
+      	  break;
+
+      	#ifdef U20_Pro
+      	  case 2002:	// wait for levelling measuring 
+      		  planner.synchronize();
+      		  LGT_LCD.LGT_Change_Page(ID_MENU_MEASU_S1 + 1);
+      		  break;
+      	#endif // U20_Pro
+
+      	case 2003:      //save position and filament runout  move
+      	  LGT_Pause_Move();
+      	  break;
+
+      	case 2004:  //load filament
+      	  LGT_LCD.LGT_Change_Filament(LOAD_FILA_LEN);
+      	  break;
+
+      	case 2005:  //unload filament
+      	  LGT_LCD.LGT_Change_Filament(UNLOAD_FILA_LEN);
+      	  break;
+
+      	case 2006:   //filament change in printing
+      	  LGT_Pause_Move();
+      	  LGT_LCD.LGT_Change_Page(ID_MENU_HOME_FILA_0);
+      	  menu_type = eMENU_HOME_FILA;
+      	  break;
+
+      	case 2007:
+      	  if (parser.seen('Z'))
+      	  {
+      		  current_position[Z_AXIS] = parser.value_linear_units();
+      		  LGT_Line_To_Current(Z_AXIS);
+      		  planner.set_z_position_mm((destination[Z_AXIS] = current_position[Z_AXIS] = 0));
+      	  }
+      	  else if (parser.seen('E'))
+      	  {
+      		  current_position[E_AXIS] = parser.value_linear_units();
+      		  LGT_Line_To_Current(E_AXIS);
+      		  planner.set_e_position_mm((destination[E_CART] = current_position[E_CART] = 0));
+      	  }
+      	  break;
+
+      	case 2008:
+      	  for (int add = EEPROM_INDEX; add < (EEPROM_INDEX + 4); add++)
+      	  {
+      		  eeprom_write_byte((uint8_t *)add, (uint8_t)0);
+      		  MYSERIAL0.println((int)eeprom_read_byte((const uint8_t *)add));
+      	  }
+      	break;
+      #endif // LGT_MAC
 	 
       default: parser.unknown_command_error();
     }
@@ -15175,9 +15187,9 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   if (max_inactive_time && ELAPSED(ms, previous_move_ms + max_inactive_time)) {
     SERIAL_ERROR_START();
     SERIAL_ECHOLNPAIR(MSG_KILL_INACTIVE_TIME, parser.command_ptr);
-	#ifdef LGT_MAC
-		kill_type = TIMEOUT_KILL;
-	#endif // LGT_MAC
+    #ifdef LGT_MAC
+      kill_type = TIMEOUT_KILL;
+    #endif // LGT_MAC
     kill(PSTR(MSG_KILLED));
   }
 
@@ -15371,15 +15383,18 @@ void idle(
     max7219.idle_tasks();
   #endif
 
-	//lcd_update();
+  #ifndef LGT_MAC
+    lcd_update();
+  #endif
+
   host_keepalive();
 
   manage_inactivity(
-#ifdef LGT_MAC
-	  LGT_is_printing
-#elif ENABLED(ADVANCED_PAUSE_FEATURE)
+    #ifdef LGT_MAC
+      LGT_is_printing
+    #elif ENABLED(ADVANCED_PAUSE_FEATURE)
       no_stepper_sleep
-#endif //LGT_MAC
+    #endif //LGT_MAC
   );
 
   thermalManager.manage_heater();
@@ -15410,9 +15425,9 @@ void idle(
       #endif
     }
   #endif
-#ifdef LGT_MAC
-	DWIN_MAIN_FUNCTIONS();
-#endif // LGT_MAC
+  #ifdef LGT_MAC
+  	DWIN_MAIN_FUNCTIONS();
+  #endif // LGT_MAC
 }
 
 /**
@@ -15423,10 +15438,10 @@ void kill(const char* lcd_msg) {
   SERIAL_ERROR_START();
   SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
 
-#ifdef LGT_MAC
+  #ifdef LGT_MAC
     LGT_LCD.LGT_Print_Cause_Of_Kill();
-	LGT_LCD.LGT_Change_Page(ID_CRASH_KILLED);
-#endif // LGT_MAC
+	  LGT_LCD.LGT_Change_Page(ID_CRASH_KILLED);
+  #endif // LGT_MAC
 
 
   thermalManager.disable_all_heaters();
@@ -15727,13 +15742,12 @@ void setup() {
     #endif
   #endif
 
-  //#if ENABLED(POWER_LOSS_RECOVERY)
-  //  check_print_job_recovery();
-  //#endif
-#ifdef LGT_MAC
-	  LGT_Init();
-#endif // LGT_MAC
-//
+  #ifdef LGT_MAC
+    LGT_Init();
+  #elif ENABLED(POWER_LOSS_RECOVERY)
+    check_print_job_recovery();
+  #endif // LGT_MAC
+
   #if ENABLED(USE_WATCHDOG)
     watchdog_init();
   #endif
@@ -15763,10 +15777,34 @@ void setup() {
  */
 void loop() {
   #ifdef LGT_MAC
-	LGT_LCD_startup_settings();
+    LGT_LCD_startup_settings();
   #endif // LGT_MAC
+
   #if ENABLED(SDSUPPORT)
+
     card.checkautostart();
+
+    #ifndef LGT_MAC
+      if (card.abort_sd_printing) {
+        card.stopSDPrint(
+          #if SD_RESORT
+            true
+          #endif
+        );
+        clear_command_queue();
+        quickstop_stepper();
+        print_job_timer.stop();
+        thermalManager.disable_all_heaters();
+        #if FAN_COUNT > 0
+          for (uint8_t i = 0; i < FAN_COUNT; i++) fanSpeeds[i] = 0;
+        #endif
+        wait_for_heatup = false;
+        #if ENABLED(POWER_LOSS_RECOVERY)
+          card.removeJobRecoveryFile();
+        #endif
+      }
+	#endif // LGT_MAC
+
   #endif // SDSUPPORT
 
   if (commands_in_queue < BUFSIZE) get_available_commands();

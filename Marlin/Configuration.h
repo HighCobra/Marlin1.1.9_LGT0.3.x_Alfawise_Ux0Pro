@@ -105,18 +105,16 @@
 
 // @section machine
 #define serial_port1
-	#ifdef serial_port1
-		#define LGT_MAC	
-		#ifdef LGT_MAC
-			//U20_Pro
-				#ifdef U20_Pro
-					#define U20_Pro_AutoBed
-				#else
-					//U30_Pro
-					#define U30_Pro
-				#endif
-		#endif // LGT_MAC	
-	#endif // serial_port1
+#ifdef serial_port1
+  #define LGT_MAC
+  #ifdef LGT_MAC
+    #ifdef U20_Pro //U20_Pro
+      #define U20_Pro_AutoBed
+    #else //U30_Pro
+      #define U30_Pro
+    #endif
+  #endif // LGT_MAC	
+#endif
 /**
  * Select the serial port on the board to use for communication with the host.
  * This allows the connection of wireless adapters (for instance) to non-default port pins.
@@ -143,7 +141,7 @@
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD 33  
+  #define MOTHERBOARD BOARD_RAMPS_13_EFB  
 #endif
 
 // Optional custom name for your RepStrap or other custom machine
@@ -543,9 +541,9 @@
 #define X_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 #define Y_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 #ifdef U20_Pro
-	#define Z_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+  #define Z_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #else //U30_Pro
-	#define Z_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
+  #define Z_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 #endif
 #define X_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Y_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
@@ -733,9 +731,7 @@
  *   (e.g., an inductive probe or a nozzle-based probe-switch.)
  */
 #if ENABLED (U20_Pro_AutoBed)
-	#define FIX_MOUNTED_PROBE
-#else
- //#define FIX_MOUNTED_PROBE
+  #define FIX_MOUNTED_PROBE
 #endif
 
 /**
@@ -873,9 +869,9 @@
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
 #ifdef U20_Pro
-#define INVERT_E0_DIR false
+  #define INVERT_E0_DIR false
 #else
-#define INVERT_E0_DIR true
+  #define INVERT_E0_DIR true
 #endif
 #define INVERT_E1_DIR false
 #define INVERT_E2_DIR false
@@ -900,29 +896,29 @@
 // @section machine
 
 #ifdef U20_Pro
-	// The size of the print bed
-	#define X_BED_SIZE 300
-	#define Y_BED_SIZE 300
+  // The size of the print bed
+  #define X_BED_SIZE 300
+  #define Y_BED_SIZE 300
 
-	// Travel limits (mm) after homing, corresponding to endstop positions.
-	#define X_MIN_POS 0
-	#define Y_MIN_POS 0
-	#define Z_MIN_POS 0
-	#define X_MAX_POS X_BED_SIZE
-	#define Y_MAX_POS Y_BED_SIZE
-	#define Z_MAX_POS 400
+  // Travel limits (mm) after homing, corresponding to endstop positions.
+  #define X_MIN_POS 0
+  #define Y_MIN_POS 0
+  #define Z_MIN_POS 0
+  #define X_MAX_POS X_BED_SIZE
+  #define Y_MAX_POS Y_BED_SIZE
+  #define Z_MAX_POS 400
 #else  //U30_Pro
-		// The size of the print bed
-		#define X_BED_SIZE 220
-		#define Y_BED_SIZE 220
+  // The size of the print bed
+  #define X_BED_SIZE 220
+  #define Y_BED_SIZE 220
 
-		// Travel limits (mm) after homing, corresponding to endstop positions.
-		#define X_MIN_POS 0
-		#define Y_MIN_POS 0
-		#define Z_MIN_POS 0
-		#define X_MAX_POS X_BED_SIZE
-		#define Y_MAX_POS Y_BED_SIZE
-		#define Z_MAX_POS 250
+  // Travel limits (mm) after homing, corresponding to endstop positions.
+  #define X_MIN_POS 0
+  #define Y_MIN_POS 0
+  #define Z_MIN_POS 0
+  #define X_MAX_POS X_BED_SIZE
+  #define Y_MAX_POS Y_BED_SIZE
+  #define Z_MAX_POS 250
 #endif
 
 /**
@@ -962,11 +958,7 @@
  * For other boards you may need to define FIL_RUNOUT_PIN, FIL_RUNOUT2_PIN, etc.
  * By default the firmware assumes HIGH=FILAMENT PRESENT.
  */
-#ifdef LGT_MAC
-	#define FILAMENT_RUNOUT_SENSOR
-#else
-	//#define FILAMENT_RUNOUT_SENSOR
-#endif
+#define FILAMENT_RUNOUT_SENSOR
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
   #define NUM_RUNOUT_SENSORS   1     // Number of sensors, up to one per extruder. Define a FIL_RUNOUT#_PIN for each.
   #define FIL_RUNOUT_INVERTING true // set to true to invert the logic of the sensor.
@@ -1015,7 +1007,7 @@
 //#define AUTO_BED_LEVELING_3POINT
 //#define AUTO_BED_LEVELING_LINEAR
 #if ENABLED (U20_Pro_AutoBed)
-	#define AUTO_BED_LEVELING_BILINEAR
+  #define AUTO_BED_LEVELING_BILINEAR
 #endif
 //#define AUTO_BED_LEVELING_BILINEAR
 //#define AUTO_BED_LEVELING_UBL
@@ -1062,11 +1054,9 @@
 #if ENABLED(AUTO_BED_LEVELING_LINEAR) || ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
   // Set the number of grid points per dimension.
-#if ENABLED (U20_Pro_AutoBed)
-	#define GRID_MAX_POINTS_X 4
-#else
-	//#define GRID_MAX_POINTS_X 3
-#endif
+  #if ENABLED (U20_Pro_AutoBed)
+    #define GRID_MAX_POINTS_X 4
+  #endif
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
   // Set the boundaries for probing (where the probe can reach).
@@ -1189,9 +1179,7 @@
 // - Prevent Z homing when the Z probe is outside bed area.
 //
 #if ENABLED (U20_Pro_AutoBed)
-	#define Z_SAFE_HOMING
-#else
-	//#define Z_SAFE_HOMING
+  #define Z_SAFE_HOMING
 #endif
 
 #if ENABLED(Z_SAFE_HOMING)
@@ -1296,11 +1284,8 @@
 //
 // G20/G21 Inch mode support
 //
-#ifdef LGT_MAC
-	#define INCH_MODE_SUPPORT
-#else
-	#define INCH_MODE_SUPPORT
-#endif
+#define INCH_MODE_SUPPORT
+
 //
 // M149 Set temperature units support
 //
@@ -1330,11 +1315,7 @@
  *    P1  Raise the nozzle always to Z-park height.
  *    P2  Raise the nozzle by Z-park amount, limited to Z_MAX_POS.
  */
-#ifdef LGT_MAC
-//	#define NOZZLE_PARK_FEATURE
-#else
- //#define NOZZLE_PARK_FEATURE
-#endif // LGT_MAC
+//#define NOZZLE_PARK_FEATURE
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
   // Specify a park position as { X, Y, Z }
@@ -1486,11 +1467,7 @@
  * you must uncomment the following option or it won't work.
  *
  */
-#ifdef LGT_MAC
-	#define SDSUPPORT
-#else
-  //#define SDSUPPORT
-#endif
+#define SDSUPPORT
 
 /**
  * SD CARD: SPI SPEED

@@ -58,16 +58,17 @@
 #ifdef IS_RAMPS_13
   #define SERVO0_PIN        7   // RAMPS_13 // Will conflict with BTN_EN2 on LCD_I2C_VIKI
 #else
-	#ifndef U20_Pro_AutoBed
-		#define SERVO0_PIN       11
-	#endif // !U20_Pro_AutoBed
+  #ifndef U20_Pro_AutoBed
+    #define SERVO0_PIN       11
+  #endif // !U20_Pro_AutoBed
 #endif
+
 #ifndef LGT_MAC
-	#define SERVO1_PIN          6
-	#define SERVO2_PIN          5
-	#ifndef SERVO3_PIN
-	  #define SERVO3_PIN        4
-	#endif
+  #define SERVO1_PIN          6
+  #define SERVO2_PIN          5
+  #ifndef SERVO3_PIN
+    #define SERVO3_PIN        4
+  #endif
 #endif
 
 //
@@ -75,42 +76,39 @@
 //
 #define X_MIN_PIN           3
 #ifndef LGT_MAC
-	#ifndef X_MAX_PIN
-		#define X_MAX_PIN         2
-	#endif
-#endif // !LGT_MAC
+  #ifndef X_MAX_PIN
+    #define X_MAX_PIN         2
+  #endif
+#endif
 #define Y_MIN_PIN          14
 #define Y_MAX_PIN          15
 
 #ifdef LGT_MAC
-	#define SD_DETECT_PIN   49
-	#ifndef FIL_RUNOUT_PIN
-		#define FIL_RUNOUT_PIN  2
-	#endif
-//#endif
+  #define SD_DETECT_PIN   49
+  #ifndef FIL_RUNOUT_PIN
+    #define FIL_RUNOUT_PIN  2
+  #endif
 
-	#ifdef U20_Pro_AutoBed
-		#define Z_MIN_PIN          11
-		#define Z_MAX_PIN          37
-	#else //U30_Pro
-		#define Z_MIN_PIN          35
-		#define Z_MAX_PIN          37
-	#endif
+  #ifdef U20_Pro_AutoBed
+    #define Z_MIN_PIN          11
+    #define Z_MAX_PIN          37
+  #else //U30_Pro
+    #define Z_MIN_PIN          35
+    #define Z_MAX_PIN          37
+  #endif
 #else
-	#define Z_MIN_PIN          18
-	#define Z_MAX_PIN          19
+  #define Z_MIN_PIN          18
+  #define Z_MAX_PIN          19
 #endif
-
 
 //
 // Z Probe (when not Z_MIN_PIN)
 //
 #ifndef LGT_MAC
-	#ifndef Z_MIN_PROBE_PIN
-		#define Z_MIN_PROBE_PIN  32
-	#endif
+  #ifndef Z_MIN_PROBE_PIN
+    #define Z_MIN_PROBE_PIN  32
+  #endif
 #endif // !LGT_MAC
-
 
 
 //
@@ -145,12 +143,12 @@
 #endif
 
 #ifndef LGT_MAC
-	#define E1_STEP_PIN        36
-	#define E1_DIR_PIN         34
-	#define E1_ENABLE_PIN      30
-	#ifndef E1_CS_PIN
-		#define E1_CS_PIN        44
-	#endif
+  #define E1_STEP_PIN        36
+  #define E1_DIR_PIN         34
+  #define E1_ENABLE_PIN      30
+  #ifndef E1_CS_PIN
+    #define E1_CS_PIN        44
+  #endif
 #endif // !LGT_MAC
 
 
@@ -224,7 +222,7 @@
 //
 #define TEMP_0_PIN         13   // Analog Input
 #ifndef LGT_MAC
-	#define TEMP_1_PIN         15   // Analog Input
+  #define TEMP_1_PIN         15   // Analog Input
 #endif // !LGT_MAC
 #define TEMP_BED_PIN       14   // Analog Input
 
@@ -312,9 +310,9 @@
 
 // define digital pin 4 for the filament runout sensor. Use the RAMPS 1.4 digital input 4 on the servos connector
 #ifndef LGT_MAC
-	#ifndef FIL_RUNOUT_PIN
-	  #define FIL_RUNOUT_PIN    4
-	#endif
+  #ifndef FIL_RUNOUT_PIN
+    #define FIL_RUNOUT_PIN    4
+  #endif
 #endif
 
 #ifndef PS_ON_PIN
@@ -356,10 +354,10 @@
   #define E_MUX1_PIN 42   // E0_CS_PIN
 #endif
 #ifndef LGT_MAC
-	#ifndef E_MUX2_PIN
-		#define E_MUX2_PIN 44   // E1_CS_PIN
-	#endif
-#endif // !LGT_MAC
+  #ifndef E_MUX2_PIN
+    #define E_MUX2_PIN 44   // E1_CS_PIN
+  #endif
+#endif
 
 //////////////////////////
 // LCDs and Controllers //

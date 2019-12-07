@@ -283,7 +283,7 @@ FUNCTION:	Checking sdcard and updating file list on screen
 void LGT_SCR::LGT_SDCard_Status_Update()
 {
 #if  ENABLED(SDSUPPORT)&&PIN_EXISTS(SD_DETECT)
-    const uint8_t sd_status = (uint8_t)IS_SD_INSERTED;
+    const uint8_t sd_status = (uint8_t)IS_SD_INSERTED();
 	if (!sd_status)
 	{
 		if (sd_init_flag ==true)
@@ -520,7 +520,7 @@ void LGT_SCR::LGT_Stop_Printing()
 	#endif
 			wait_for_heatup = false;
 	#if ENABLED(POWER_LOSS_RECOVERY)
-			card.openJobRecoveryFile();
+			card.openJobRecoveryFile(false);
 			job_recovery_info.valid_head =0;
 			job_recovery_info.valid_foot =0;
 			(void)card.saveJobRecoveryInfo();

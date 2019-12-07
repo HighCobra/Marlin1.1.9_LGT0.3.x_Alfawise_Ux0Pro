@@ -35,8 +35,8 @@
 #endif
 
 #ifdef LGT_MAC
-#include "LGT_SCR.h"
-extern PRINTER_KILL_STATUS kill_type;
+  #include "LGT_SCR.h"
+  extern PRINTER_KILL_STATUS kill_type;
 #endif // LGT_MAC
 
 
@@ -113,9 +113,9 @@ bool report_tmc_status = false;
         #if ENABLED(TMC_DEBUG)
           tmc_report_all();
         #endif
-#ifdef LGT_MAC
-		  kill_type = DRIVER_KILL;
-#endif // LGT_MAC
+        #ifdef LGT_MAC
+          kill_type = DRIVER_KILL;
+        #endif // LGT_MAC
         kill(PSTR("Driver error"));
       }
     #endif

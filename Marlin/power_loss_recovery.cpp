@@ -37,12 +37,12 @@
 #include "temperature.h"
 #include "ultralcd.h"
 #ifdef LGT_MAC
-#include "LGT_SCR.h"
-extern LGT_SCR LGT_LCD;
-extern millis_t recovery_time;
-extern float recovery_z_height;
-extern float recovery_E_len;
-extern bool check_recovery;
+  #include "LGT_SCR.h"
+  extern LGT_SCR LGT_LCD;
+  extern millis_t recovery_time;
+  extern float recovery_z_height;
+  extern float recovery_E_len;
+  extern bool check_recovery;
 #endif // LGT_MAC
 
 // Recovery data
@@ -60,20 +60,25 @@ extern uint8_t active_extruder, commands_in_queue, cmd_queue_index_r;
     SERIAL_PROTOCOLLNPAIR(" valid_foot:", int(job_recovery_info.valid_foot));
     if (job_recovery_info.valid_head) {
       if (job_recovery_info.valid_head == job_recovery_info.valid_foot) {
-        //SERIAL_PROTOCOLPGM("current_position: ");
-        //LOOP_XYZE(i) {
-        //  SERIAL_PROTOCOL(job_recovery_info.current_position[i]);
-        //  if (i < E_AXIS) SERIAL_CHAR(',');
-		  SERIAL_PROTOCOL(" ");
-		  SERIAL_PROTOCOLPGM("Z_current_position: ");
-		  SERIAL_PROTOCOL(job_recovery_info.save_current_Z);
-		  SERIAL_PROTOCOL(" ");
-		  SERIAL_PROTOCOLPGM("E_current_position: ");
-		  SERIAL_PROTOCOL(job_recovery_info.save_current_E);
-       // }
-        SERIAL_EOL();
-		SERIAL_PROTOCOL(" ");
-        SERIAL_PROTOCOLLNPAIR("feedrate: ", job_recovery_info.feedrate);
+        #ifdef LGT_MAC
+          SERIAL_PROTOCOL(" ");
+          SERIAL_PROTOCOLPGM("Z_current_position: ");
+          SERIAL_PROTOCOL(job_recovery_info.save_current_Z);
+          SERIAL_PROTOCOL(" ");
+          SERIAL_PROTOCOLPGM("E_current_position: ");
+          SERIAL_PROTOCOL(job_recovery_info.save_current_E);
+          SERIAL_EOL();
+          SERIAL_PROTOCOL(" ");
+          SERIAL_PROTOCOLLNPAIR("feedrate: ", job_recovery_info.feedrate);
+        #else
+          SERIAL_PROTOCOLPGM("current_position: ");
+          LOOP_XYZE(i) {
+            SERIAL_PROTOCOL(job_recovery_info.current_position[i]);
+            if (i < E_AXIS) SERIAL_CHAR(',');
+          }
+          SERIAL_EOL();
+          SERIAL_PROTOCOLLNPAIR("feedrate: ", job_recovery_info.feedrate);
+        #endif
 
         #if HOTENDS > 1
           SERIAL_PROTOCOLLNPAIR("active_hotend: ", int(job_recovery_info.active_hotend));
@@ -99,10 +104,10 @@ extern uint8_t active_extruder, commands_in_queue, cmd_queue_index_r;
           SERIAL_EOL();
         #endif
 
-        //#if HAS_LEVELING
-        //  SERIAL_PROTOCOLPAIR("leveling: ", int(job_recovery_info.leveling));
-        //  SERIAL_PROTOCOLLNPAIR(" fade: ", int(job_recovery_info.fade));
-        //#endif
+        #if HAS_LEVELING && !defined(LGT_MAC)
+          SERIAL_PROTOCOLPAIR("leveling: ", int(job_recovery_info.leveling));
+          SERIAL_PROTOCOLLNPAIR(" fade: ", int(job_recovery_info.fade));
+        #endif
         SERIAL_PROTOCOLLNPAIR("cmd_queue_index_r: ", int(job_recovery_info.cmd_queue_index_r));
         SERIAL_PROTOCOLLNPAIR("commands_in_queue: ", int(job_recovery_info.commands_in_queue));
         if (recovery)
@@ -142,39 +147,86 @@ void check_print_job_recovery() {
       card.openJobRecoveryFile(true);
       card.loadJobRecoveryInfo();
       card.closeJobRecoveryFile();
+      //card.removeJobRecoveryFile();
 
-      if ((job_recovery_info.valid_head!=0)&&(job_recovery_info.valid_head == job_recovery_info.valid_foot)) {
+      if (job_recovery_info.valid_head && job_recovery_info.valid_head == job_recovery_info.valid_foot) {
 
-	#ifdef LGT_MAC
-		  check_recovery = true;
-	#endif
-        uint8_t ind = 0;
-		feedrate_mm_s = job_recovery_info.feedrate;
+        #ifdef LGT_MAC
+          check_recovery = true;
+          uint8_t ind = 0;
+          feedrate_mm_s = job_recovery_info.feedrate;
 
-		char str_Z[16], str_E[16];
-		memset(str_Z, 0, sizeof(str_Z));
-		memset(str_E, 0, sizeof(str_E));
+          char str_Z[16], str_E[16];
+          memset(str_Z, 0, sizeof(str_Z));
+          memset(str_E, 0, sizeof(str_E));
 
-		dtostrf(job_recovery_info.save_current_Z, 1, 3, str_Z); 
-		dtostrf(job_recovery_info.save_current_E, 1, 3, str_E); 
+          dtostrf(job_recovery_info.save_current_Z, 1, 3, str_Z);
+          dtostrf(job_recovery_info.save_current_E, 1, 3, str_E);
 
-	#ifdef U20_Pro
-		sprintf_P(job_recovery_commands[ind++], PSTR("G28 R0 X0 Y0"));
-		sprintf_P(job_recovery_commands[ind++], PSTR("M420 S0"));
-		sprintf_P(job_recovery_commands[ind++], PSTR("M2007 E4"));
-	#endif // U20_Pro
-		sprintf_P(job_recovery_commands[ind++], PSTR("G92 Z%s E%s"), str_Z, str_E);
-		sprintf_P(job_recovery_commands[ind++], PSTR("G28 R0 X0 Y0"));
+          #ifdef U20_Pro
+            sprintf_P(job_recovery_commands[ind++], PSTR("G28 R0 X0 Y0"));
+            sprintf_P(job_recovery_commands[ind++], PSTR("M420 S0"));
+            sprintf_P(job_recovery_commands[ind++], PSTR("M2007 E4"));
+          #endif // U20_Pro
+          sprintf_P(job_recovery_commands[ind++], PSTR("G92 Z%s E%s"), str_Z, str_E);
+          sprintf_P(job_recovery_commands[ind++], PSTR("G28 R0 X0 Y0"));
 
-        uint8_t r = job_recovery_info.cmd_queue_index_r, c = job_recovery_info.commands_in_queue;
-        while (c--) {
-          strcpy(job_recovery_commands[ind++], job_recovery_info.command_queue[r]);
-          r = (r + 1) % BUFSIZE;
-        }
+          uint8_t r = job_recovery_info.cmd_queue_index_r, c = job_recovery_info.commands_in_queue;
+          while (c--) {
+            strcpy(job_recovery_commands[ind++], job_recovery_info.command_queue[r]);
+            r = (r + 1) % BUFSIZE;
+          }
 
-        if (job_recovery_info.sd_filename[0] == '/') job_recovery_info.sd_filename[0] = ' ';
-        sprintf_P(job_recovery_commands[ind++], PSTR("M23 %s"), job_recovery_info.sd_filename);
-		sprintf_P(job_recovery_commands[ind++], PSTR("M24 S%ld"), job_recovery_info.sdpos);
+          if (job_recovery_info.sd_filename[0] == '/') job_recovery_info.sd_filename[0] = ' ';
+          sprintf_P(job_recovery_commands[ind++], PSTR("M23 %s"), job_recovery_info.sd_filename);
+          sprintf_P(job_recovery_commands[ind++], PSTR("M24 S%ld"), job_recovery_info.sdpos);
+        #else
+          uint8_t ind = 0;
+  
+          #if HAS_LEVELING
+            strcpy_P(job_recovery_commands[ind++], PSTR("M420 S0 Z0"));               // Leveling off before G92 or G28
+          #endif
+  
+          strcpy_P(job_recovery_commands[ind++], PSTR("G92.0 Z0"));                   // Ensure Z is equal to 0
+          strcpy_P(job_recovery_commands[ind++], PSTR("G1 Z2"));                      // Raise Z by 2mm (we hope!)
+          strcpy_P(job_recovery_commands[ind++], PSTR("G28 R0"
+          #if ENABLED(MARLIN_DEV_MODE)
+            " S"
+          #elif !IS_KINEMATIC
+            " X Y"                                                                  // Home X and Y for Cartesian
+          #endif
+          ));
+  
+          char str_1[16], str_2[16];
+  
+          #if HAS_LEVELING
+            if (job_recovery_info.fade || job_recovery_info.leveling) {
+              // Restore leveling state before G92 sets Z
+              // This ensures the steppers correspond to the native Z
+              dtostrf(job_recovery_info.fade, 1, 1, str_1);
+              sprintf_P(job_recovery_commands[ind++], PSTR("M420 S%i Z%s"), int(job_recovery_info.leveling), str_1);
+            }
+          #endif
+  
+          dtostrf(job_recovery_info.current_position[Z_AXIS] + 2, 1, 3, str_1);
+          dtostrf(job_recovery_info.current_position[E_CART]
+          #if ENABLED(SAVE_EACH_CMD_MODE)
+            - 5
+          #endif
+            , 1, 3, str_2
+          );
+          sprintf_P(job_recovery_commands[ind++], PSTR("G92.0 Z%s E%s"), str_1, str_2); // Current Z + 2 and E
+  
+          uint8_t r = job_recovery_info.cmd_queue_index_r, c = job_recovery_info.commands_in_queue;
+          while (c--) {
+            strcpy(job_recovery_commands[ind++], job_recovery_info.command_queue[r]);
+            r = (r + 1) % BUFSIZE;
+          }
+  
+          if (job_recovery_info.sd_filename[0] == '/') job_recovery_info.sd_filename[0] = ' ';
+          sprintf_P(job_recovery_commands[ind++], PSTR("M23 %s"), job_recovery_info.sd_filename);
+          sprintf_P(job_recovery_commands[ind++], PSTR("M24 S%ld T%ld"), job_recovery_info.sdpos, job_recovery_info.print_job_elapsed);
+        #endif
 
         job_recovery_commands_count = ind;
 
@@ -199,59 +251,143 @@ void save_job_recovery_info() {
     static millis_t next_save_ms; // = 0;  // Init on reset
     millis_t ms = millis();
   #endif
-  if ((current_position[2] > 0 &&abs(( current_position[2]+ recovery_z_height) -job_recovery_info.save_current_Z)>=0.1)) 
-  {
-	  int i = 0;
-    #if SAVE_INFO_INTERVAL_MS > 0
-      next_save_ms = ms + SAVE_INFO_INTERVAL_MS;
-    #endif
 
-    // Head and foot will match if valid data was saved
-    if (!++job_recovery_info.valid_head) ++job_recovery_info.valid_head; // non-zero in sequence
-    job_recovery_info.valid_foot = job_recovery_info.valid_head;
+  #ifdef LGT_MAC
+    if ((current_position[2] > 0 && abs((current_position[2] + recovery_z_height) - job_recovery_info.save_current_Z) >= 0.1))
+    {
+      int i = 0;
+      #if SAVE_INFO_INTERVAL_MS > 0
+        next_save_ms = ms + SAVE_INFO_INTERVAL_MS;
+      #endif
 
-    // Machine state
-	job_recovery_info.save_current_Z = current_position[2]+recovery_z_height;
-	job_recovery_info.save_current_E = current_position[3];
+      // Head and foot will match if valid data was saved
+      if (!++job_recovery_info.valid_head) ++job_recovery_info.valid_head; // non-zero in sequence
+      job_recovery_info.valid_foot = job_recovery_info.valid_head;
 
-    job_recovery_info.feedrate = feedrate_mm_s;
-	job_recovery_info.have_percentdone = card.percentDone();
+      // Machine state
+      job_recovery_info.save_current_Z = current_position[2] + recovery_z_height;
+      job_recovery_info.save_current_E = current_position[3];
 
-	for (i = 0; i < HOTENDS; i++)
-	{
-		job_recovery_info.target_temperature[i] = thermalManager.target_temperature[i];
-	}
+      job_recovery_info.feedrate = feedrate_mm_s;
+      job_recovery_info.have_percentdone = card.percentDone();
+
+      for (i = 0; i < HOTENDS; i++)
+      {
+        job_recovery_info.target_temperature[i] = thermalManager.target_temperature[i];
+      }
       job_recovery_info.target_temperature_bed = thermalManager.target_temperature_bed;
 
-    #if FAN_COUNT
-      COPY(job_recovery_info.fanSpeeds, fanSpeeds);
-    #endif
+      #if FAN_COUNT
+        COPY(job_recovery_info.fanSpeeds, fanSpeeds);
+      #endif
 
-    // Commands in the queue
-    job_recovery_info.cmd_queue_index_r = cmd_queue_index_r;
-    job_recovery_info.commands_in_queue = commands_in_queue;
-    COPY(job_recovery_info.command_queue, command_queue);
+      // Commands in the queue
+      job_recovery_info.cmd_queue_index_r = cmd_queue_index_r;
+      job_recovery_info.commands_in_queue = commands_in_queue;
+      COPY(job_recovery_info.command_queue, command_queue);
 
-    // Elapsed print job time
-    job_recovery_info.print_job_elapsed = recovery_time+print_job_timer.duration();
+      // Elapsed print job time
+      job_recovery_info.print_job_elapsed = recovery_time + print_job_timer.duration();
 
-    // SD file position
-    card.getAbsFilename(job_recovery_info.sd_filename);
-    job_recovery_info.sdpos = card.getIndex();
+      // SD file position
+      card.getAbsFilename(job_recovery_info.sd_filename);
+      job_recovery_info.sdpos = card.getIndex();
 
-    #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
-      SERIAL_PROTOCOLLNPGM("Saving...");
-      debug_print_job_recovery(false);
-    #endif
+      #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+        SERIAL_PROTOCOLLNPGM("Saving...");
+        debug_print_job_recovery(false);
+      #endif
 
-   card.openJobRecoveryFile();
-    (void)card.saveJobRecoveryInfo();
+      card.openJobRecoveryFile(false);
+      (void)card.saveJobRecoveryInfo();
 
-    // If power-loss pin was triggered, write just once then kill
-    #if PIN_EXISTS(POWER_LOSS)
-      if (READ(POWER_LOSS_PIN) == POWER_LOSS_STATE) kill(PSTR(MSG_POWER_LOSS_RECOVERY));
-    #endif
-  }
-}
+      // If power-loss pin was triggered, write just once then kill
+      #if PIN_EXISTS(POWER_LOSS)
+        if (READ(POWER_LOSS_PIN) == POWER_LOSS_STATE) kill(PSTR(MSG_POWER_LOSS_RECOVERY));
+      #endif
+    }
+  #else
+    if (
+      // Save on every command
+      #if ENABLED(SAVE_EACH_CMD_MODE)
+        true
+      #else
+        // Save if power loss pin is triggered
+        #if PIN_EXISTS(POWER_LOSS)
+          READ(POWER_LOSS_PIN) == POWER_LOSS_STATE ||
+        #endif
+        // Save if interval is elapsed
+        #if SAVE_INFO_INTERVAL_MS > 0
+          ELAPSED(ms, next_save_ms) ||
+        #endif
+        // Save on every new Z height
+        (current_position[Z_AXIS] > 0 && current_position[Z_AXIS] > job_recovery_info.current_position[Z_AXIS])
+      #endif
+        ) {
+
+      #if SAVE_INFO_INTERVAL_MS > 0
+        next_save_ms = ms + SAVE_INFO_INTERVAL_MS;
+      #endif
+
+      // Head and foot will match if valid data was saved
+      if (!++job_recovery_info.valid_head) ++job_recovery_info.valid_head; // non-zero in sequence
+      job_recovery_info.valid_foot = job_recovery_info.valid_head;
+
+      // Machine state
+      COPY(job_recovery_info.current_position, current_position);
+      job_recovery_info.feedrate = feedrate_mm_s;
+
+      #if HOTENDS > 1
+        job_recovery_info.active_hotend = active_extruder;
+      #endif
+
+      COPY(job_recovery_info.target_temperature, thermalManager.target_temperature);
+
+      #if HAS_HEATED_BED
+        job_recovery_info.target_temperature_bed = thermalManager.target_temperature_bed;
+      #endif
+
+      #if FAN_COUNT
+        COPY(job_recovery_info.fanSpeeds, fanSpeeds);
+      #endif
+
+      #if HAS_LEVELING
+        job_recovery_info.leveling = planner.leveling_active;
+        job_recovery_info.fade = (
+        #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
+          planner.z_fade_height
+        #else
+          0
+        #endif
+        );
+      #endif
+
+      // Commands in the queue
+      job_recovery_info.cmd_queue_index_r = cmd_queue_index_r;
+      job_recovery_info.commands_in_queue = commands_in_queue;
+      COPY(job_recovery_info.command_queue, command_queue);
+
+      // Elapsed print job time
+      job_recovery_info.print_job_elapsed = print_job_timer.duration();
+
+      // SD file position
+      card.getAbsFilename(job_recovery_info.sd_filename);
+      job_recovery_info.sdpos = card.getIndex();
+
+      #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+        SERIAL_PROTOCOLLNPGM("Saving...");
+        debug_print_job_recovery(false);
+      #endif
+
+      card.openJobRecoveryFile(false);
+      (void)card.saveJobRecoveryInfo();
+
+      // If power-loss pin was triggered, write just once then kill
+      #if PIN_EXISTS(POWER_LOSS)
+        if (READ(POWER_LOSS_PIN) == POWER_LOSS_STATE) kill(PSTR(MSG_POWER_LOSS_RECOVERY));
+      #endif
+    }
+  #endif
+} 
 
 #endif // POWER_LOSS_RECOVERY

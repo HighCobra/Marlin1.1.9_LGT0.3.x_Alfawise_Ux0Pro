@@ -5,7 +5,7 @@
 #include "printcounter.h"
 #include "temperature.h"
 #include "duration_t.h"
-#include"LGT_MACRO.h"
+#include "LGT_MACRO.h"
 #include "power_loss_recovery.h"
 #include "planner.h"
 #include "parser.h"
@@ -22,6 +22,7 @@ extern int ii_setup;
 extern void DWIN_MAIN_FUNCTIONS();
 extern bool enqueue_and_echo_command(const char* cmd);
 extern bool check_recovery;
+
 typedef struct Data_Buffer
 {
 	unsigned char head[2];
@@ -31,6 +32,7 @@ typedef struct Data_Buffer
 	unsigned int data[30];
 	char data_num[6];
 }DATA;
+
 enum PRINTER_STATUS
 {
 	PRINTER_SETUP,
@@ -40,6 +42,7 @@ enum PRINTER_STATUS
 	PRINTER_PAUSE,
 	PRINTER_PRINTING_F
 };
+
 enum PRINTER_KILL_STATUS
 {
 	PRINTER_NORMAL = 0,
@@ -57,6 +60,7 @@ enum PRINTER_KILL_STATUS
 	B_MAXTEMP_KILL,
 	E_RUNAWAY_KILL
 };
+
 class LGT_SCR
 {
 public:
@@ -88,6 +92,7 @@ public:
 	void LGT_DW_Setup();
 	void LGT_Change_Filament(int fila_len);
 };
+
 #define CHANGE_TXT_COLOR(addr,color)	LGT_Send_Data_To_Screen((uint16_t)addr,(int16_t)color)
 #define SP_COLOR_SEL_FILE_NAME			(SP_COLOR_TXT_PRINT_FILE_ITEM_0 + sel_fileid*LEN_FILE_NAME)
 #define HILIGHT_FILE_NAME()				CHANGE_TXT_COLOR(SP_COLOR_SEL_FILE_NAME, COLOR_LIGHT_RED)

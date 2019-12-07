@@ -35,8 +35,8 @@
 #include "endstops.h"
 
 #if ENABLED(LGT_MAC)
-#include "LGT_SCR.h"
-	extern PRINTER_KILL_STATUS kill_type;
+  #include "LGT_SCR.h"
+  extern PRINTER_KILL_STATUS kill_type;
 #endif
 
 #if ENABLED(HEATER_0_USES_MAX6675)
@@ -66,8 +66,7 @@
 #endif
 
 #ifdef LGT_MAC
-	extern void DWIN_MAIN_FUNCTIONS();
-
+  extern void DWIN_MAIN_FUNCTIONS();
 #endif // LGT_MAC
 
 Temperature thermalManager;
@@ -442,26 +441,26 @@ uint8_t Temperature::soft_pwm_amount[HOTENDS];
             #endif
           ) {
             if (!heated) {                                          // If not yet reached target...
-				if (current > next_watch_temp) {                      // Over the watch temp?
-					next_watch_temp = current + watch_temp_increase;    // - set the next temp to watch for
-					temp_change_ms = ms + watch_temp_period * 1000UL;   // - move the expiration timer up
-					if (current > watch_temp_target) heated = true;     // - Flag if target temperature reached
-				}
-				else if (ELAPSED(ms, temp_change_ms))                 // Watch timer expired
-				{
-				#ifdef LGT_MAC
-					kill_type = E_TEMP_KILL;
-				#endif // LGT_MAC
-					_temp_error(hotend, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, hotend));
-				}
+              if (current > next_watch_temp) {                      // Over the watch temp?
+              	next_watch_temp = current + watch_temp_increase;    // - set the next temp to watch for
+              	temp_change_ms = ms + watch_temp_period * 1000UL;   // - move the expiration timer up
+              	if (current > watch_temp_target) heated = true;     // - Flag if target temperature reached
+              }
+              else if (ELAPSED(ms, temp_change_ms))                 // Watch timer expired
+              {
+                #ifdef LGT_MAC
+                  kill_type = E_TEMP_KILL;
+                #endif // LGT_MAC
+              	_temp_error(hotend, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, hotend));
+              }
             }
-			else if (current < target - (MAX_OVERSHOOT_PID_AUTOTUNE)) // Heated, then temperature fell too far?
-			{
-			#ifdef LGT_MAC
-				kill_type = E_RUNAWAY_KILL;
-			#endif // LGT_MAC
-				_temp_error(hotend, PSTR(MSG_T_THERMAL_RUNAWAY), TEMP_ERR_PSTR(MSG_THERMAL_RUNAWAY, hotend));
-			}
+            else if (current < target - (MAX_OVERSHOOT_PID_AUTOTUNE)) // Heated, then temperature fell too far?
+            {
+              #ifdef LGT_MAC
+              	kill_type = E_RUNAWAY_KILL;
+              #endif // LGT_MAC
+            	_temp_error(hotend, PSTR(MSG_T_THERMAL_RUNAWAY), TEMP_ERR_PSTR(MSG_THERMAL_RUNAWAY, hotend));
+            }
           }
         #endif
       } // every 2 seconds
@@ -521,9 +520,9 @@ uint8_t Temperature::soft_pwm_amount[HOTENDS];
         return;
       }
       lcd_update();
-#ifdef LGT_MAC
-	  DWIN_MAIN_FUNCTIONS();
-#endif // LGT_MAC
+      #ifdef LGT_MAC
+	    DWIN_MAIN_FUNCTIONS();
+      #endif // LGT_MAC
     }
     disable_all_heaters();
   }
@@ -616,22 +615,22 @@ void Temperature::_temp_error(const int8_t e, const char * const serial_msg, con
 }
 
 void Temperature::max_temp_error(const int8_t e) {
-#ifdef LGT_MAC
-	if (e >= 0)
-		kill_type = E_MAXTEMP_KILL;
-	else
-		kill_type= B_MAXTEMP_KILL;
-#endif // LGT_MAC
+  #ifdef LGT_MAC
+    if (e >= 0)
+      kill_type = E_MAXTEMP_KILL;
+    else
+      kill_type = B_MAXTEMP_KILL;
+  #endif // LGT_MAC
   _temp_error(e, PSTR(MSG_T_MAXTEMP), TEMP_ERR_PSTR(MSG_ERR_MAXTEMP, e));
 }
 
 void Temperature::min_temp_error(const int8_t e) {
-#ifdef LGT_MAC
-	if (e >= 0)
-		kill_type = E_MINTEMP_KILL;
-	else
-		kill_type = B_MINTEMP_KILL;
-#endif // LGT_MAC
+  #ifdef LGT_MAC
+  	if (e >= 0)
+  	  kill_type = E_MINTEMP_KILL;
+  	else
+  	  kill_type = B_MINTEMP_KILL;
+  #endif // LGT_MAC
   _temp_error(e, PSTR(MSG_T_MINTEMP), TEMP_ERR_PSTR(MSG_ERR_MINTEMP, e));
 }
 
@@ -790,10 +789,10 @@ void Temperature::manage_heater() {
 
   #if ENABLED(EMERGENCY_PARSER)
 	if (emergency_parser.killed_by_M112) {
-#ifdef LGT_MAC
-		kill_type = M112_KILL;
-#endif // LGT_MAC
-		kill(PSTR(MSG_KILLED));
+      #ifdef LGT_MAC
+        kill_type = M112_KILL;
+      #endif // LGT_MAC
+      kill(PSTR(MSG_KILLED));
 	}
   #endif
 
@@ -828,12 +827,12 @@ void Temperature::manage_heater() {
       // Make sure temperature is increasing
       if (watch_heater_next_ms[e] && ELAPSED(ms, watch_heater_next_ms[e])) { // Time to check this extruder?
 		  if (degHotend(e) < watch_target_temp[e])                             // Failed to increase enough?
-		  {
-		#ifdef LGT_MAC
-			  kill_type = E_TEMP_KILL;
-		#endif // LGT_MAC
-			  _temp_error(e, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, e));
-		  }
+          {
+            #ifdef LGT_MAC
+              kill_type = E_TEMP_KILL;
+            #endif // LGT_MAC
+            _temp_error(e, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, e));
+          }
         else                                                                 // Start again if the target is still far off
           start_watching_heater(e);
       }
@@ -872,13 +871,13 @@ void Temperature::manage_heater() {
     #if WATCH_THE_BED
       // Make sure temperature is increasing
       if (watch_bed_next_ms && ELAPSED(ms, watch_bed_next_ms)) {        // Time to check the bed?
-		  if (degBed() < watch_target_bed_temp)                           // Failed to increase enough?
-		  {
-			#ifdef LGT_MAC
-			  kill_type = B_TEMP_KILL;
-			#endif // LGT_MAC
-			  _temp_error(-1, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, -1));
-		  }
+        if (degBed() < watch_target_bed_temp)                           // Failed to increase enough?
+        {
+          #ifdef LGT_MAC
+            kill_type = B_TEMP_KILL;
+          #endif // LGT_MAC
+          _temp_error(-1, PSTR(MSG_T_HEATING_FAILED), TEMP_ERR_PSTR(MSG_HEATING_FAILED_LCD, -1));
+        }
         else                                                            // Start again if the target is still far off
           start_watching_bed();
       }
@@ -974,9 +973,9 @@ float Temperature::analog_to_celsius_hotend(const int raw, const uint8_t e) {
       SERIAL_ERROR_START();
       SERIAL_ERROR((int)e);
       SERIAL_ERRORLNPGM(MSG_INVALID_EXTRUDER_NUM);
-#ifdef LGT_MAC
-	  kill_type = EXTRUDER_KILL;
-#endif // LGT_MAC
+      #ifdef LGT_MAC
+        kill_type = EXTRUDER_KILL;
+      #endif // LGT_MAC
       kill(PSTR(MSG_KILLED));
       return 0.0;
     }
@@ -1527,12 +1526,12 @@ void Temperature::init() {
         else if (PENDING(millis(), *timer)) break;
         *state = TRRunaway;
       case TRRunaway:
-	  {
-		#ifdef LGT_MAC
-			kill_type = E_RUNAWAY_KILL;
-		#endif // LGT_MAC
-		  _temp_error(heater_id, PSTR(MSG_T_THERMAL_RUNAWAY), TEMP_ERR_PSTR(MSG_THERMAL_RUNAWAY, heater_id));
-	  }
+      {
+        #ifdef LGT_MAC
+          kill_type = E_RUNAWAY_KILL;
+        #endif // LGT_MAC
+        _temp_error(heater_id, PSTR(MSG_T_THERMAL_RUNAWAY), TEMP_ERR_PSTR(MSG_THERMAL_RUNAWAY, heater_id));
+      }
     }
   }
 

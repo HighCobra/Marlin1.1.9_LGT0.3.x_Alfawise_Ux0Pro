@@ -56,9 +56,8 @@
 #include "vector_3.h"
 
 #ifdef LGT_MAC
-#include "LGT_SCR.h"
+  #include "LGT_SCR.h"
 #endif // LGT_MAC
-
 
 #if ENABLED(MESH_BED_LEVELING)
   #include "mesh_bed_leveling.h"

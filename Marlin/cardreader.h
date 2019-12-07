@@ -89,7 +89,6 @@ public:
 
   #if ENABLED(POWER_LOSS_RECOVERY)
     void openJobRecoveryFile(const bool read);
-	void openJobRecoveryFile();
     void closeJobRecoveryFile();
     bool jobRecoverFileExists();
     int16_t saveJobRecoveryInfo();
